@@ -1,35 +1,35 @@
-# """
-# Middleware module
-# """
+"""
+Middleware module
+"""
 
-# from typing import Optional
+from typing import Optional
 
-# from fastapi import Request
-# from pydantic import BaseModel
-# from starlette.middleware.base import BaseHTTPMiddleware
-
-
-# # Define your user model
-# class User(BaseModel):
-#     """
-#     Place holder model django old code base
-#     """
-
-#     id: int
-#     username: str
-#     email: Optional[str] = None
-#     roles: list[str] = []
+from fastapi import Request
+from pydantic import BaseModel
+from starlette.middleware.base import BaseHTTPMiddleware
 
 
-# class UserInjectionMiddleware(BaseHTTPMiddleware):
+# Define your user model
+class User(BaseModel):
+    """
+    Place holder model django old code base
+    """
 
-#     async def dispatch(self, request: Request, call_next):
-#         # Default: unauthenticated
-#         request.scope["user"] = User(id=1, username="system")
-#         request.scope["auth"] = None
+    id: int
+    username: str
+    email: Optional[str] = None
+    roles: list[str] = []
 
-#         # auth = request.headers.get("authorization")
 
-#         response = await call_next(request)
-#         return response
+class UserInjectionMiddleware(BaseHTTPMiddleware):
+
+    async def dispatch(self, request: Request, call_next):
+        # Default: unauthenticated
+        request.scope["user"] = User(id=1, username="system")
+        request.scope["auth"] = None
+
+        # auth = request.headers.get("authorization")
+
+        response = await call_next(request)
+        return response
 

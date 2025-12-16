@@ -14,3 +14,13 @@ class FileType(StrEnum):
     CSV = "csv"
     EXCEL = "excel"
     PDF = "pdf"
+
+class TranscationType(StrEnum):
+    UPI = 'upi'
+    IMPS = 'imps'
+    NEFT = 'neft'
+    ATM = 'atm'
+    INTERNAL_TRANSFER = 'internal_transfer'
+    CHEQUE = 'cheque'
+    CASH = 'cash'
+

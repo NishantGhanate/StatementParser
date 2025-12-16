@@ -108,6 +108,7 @@ temp/
 *.temp
 *.bak
 *.backup
+files/
 
 # ============================================
 # UPLOADS / DATA
