@@ -1,10 +1,10 @@
 import re
 import pdfplumber
 from typing import List
-from ..parsers.base_parser import BaseBankParser
-from ..parsers.base_parsing_rules import DateAmountRule
+from app.pdf_normalizer.parsers.base_parser import BankStatementParser
+from app.pdf_normalizer.parsers.base_parsing_rules import DateAmountRule
 
-class UnionBankParser(BaseBankParser):
+class UnionBankParser(BankStatementParser):
     rules = [DateAmountRule()]
     bank_name = "UNION"
 
