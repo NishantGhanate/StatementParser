@@ -2,13 +2,13 @@ import re
 from app.pdf_normalizer.parsers.base_parser import BankStatementParser
 from app.pdf_normalizer.parsers.base_parsing_rules import DateAmountRule
 
-class UnionBankParser(BankStatementParser):
+class HdfcBankParser(BankStatementParser):
     rules = [DateAmountRule()]
-    bank_name = "UNION"
+    bank_name = "HDFC"
 
 
     def detect(self, text: str) -> bool:
-        is_union = "ubin" in text.lower()
+        is_union = "hdfc" in text.lower()
         return is_union
 
 
@@ -21,8 +21,6 @@ class UnionBankParser(BankStatementParser):
         txns = []
         for row in rows:
             for rule in self.rules:
-                breakpoint()
-                is_match, index = rule.match(row)
-                if is_match:
-                    txns.append()
+                if rule.match(row):
+                    txns.append(rule.extract(row))
         return txns
