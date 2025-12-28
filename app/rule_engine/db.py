@@ -3,11 +3,8 @@ Database storage and retrieval for categorization rules.
 
 Stores rules as DSL text in database, parses on load.
 """
-
+import logging
 from typing import List, Optional
-from dataclasses import dataclass
-import json
-
 from app.rule_engine.ast_nodes import (
     CategorizationRule, OrBlock, AndBlock, FilterExpression, Assignment,
     EqualOperator, NotEqualOperator, GreaterThanOperator, LessThanOperator,
@@ -17,6 +14,7 @@ from app.rule_engine.ast_nodes import (
 )
 from .parser import parse
 
+logger = logging.getLogger("app")
 
 # =============================================================================
 # DATABASE SCHEMA
@@ -135,7 +133,7 @@ class RuleLoader:
                 rules.append(rule)
             except Exception as e:
                 # Log error but continue loading other rules
-                print(f"Error parsing rule {db_id} ({name}): {e}")
+                logger.exception(f"Error parsing rule {db_id} ({name}): {e}")
 
         return rules
 
@@ -160,7 +158,7 @@ class RuleLoader:
     def update_rule(self, rule_id: int, dsl_text: str, priority: Optional[int] = None):
         """Update an existing rule."""
         # Validate DSL first
-        parse(dsl_text)  # Raises if invalid
+        logger.debug(dsl_text)  # Raises if invalid
 
         if priority is not None:
             query = """
@@ -261,20 +259,20 @@ def _expr_to_dsl(expr: FilterExpression) -> str:
     if isinstance(op, ContainsOperator):
         values = ",".join(f'"{v}"' for v in op.values)
         case_flag = "" if op.case_sensitive else ":i"
-        return f'{field}:c:{values}{case_flag}'
+        return f'{field}:con:{values}{case_flag}'
 
     if isinstance(op, NotContainsOperator):
         values = ",".join(f'"{v}"' for v in op.values)
         case_flag = "" if op.case_sensitive else ":i"
-        return f'{field}:nc:{values}{case_flag}'
+        return f'{field}:noc:{values}{case_flag}'
 
     if isinstance(op, StartsWithOperator):
         case_flag = "" if op.case_sensitive else ":i"
-        return f'{field}:s:"{op.value}"{case_flag}'
+        return f'{field}:sw:"{op.value}"{case_flag}'
 
     if isinstance(op, EndsWithOperator):
         case_flag = "" if op.case_sensitive else ":i"
-        return f'{field}:e:"{op.value}"{case_flag}'
+        return f'{field}:ew:"{op.value}"{case_flag}'
 
     if isinstance(op, RegexOperator):
         case_flag = "" if op.case_sensitive else ":i"
