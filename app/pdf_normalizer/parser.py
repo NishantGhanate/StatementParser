@@ -3,23 +3,31 @@ Docstring :
 > source venv/bin/activate
 > source .env
 
+> python app/pdf_normalizer/parser.py files/union.pdf
 > python app/pdf_normalizer/parser.py files/15547619-XXXXXXX-400008_unlocked.pdf
 > python app/pdf_normalizer/parser.py files/hdfc.pdf
 """
 from app.pdf_normalizer.banks import UnionBankParser, HdfcBankParser
 from app.pdf_normalizer.utils import get_bank_identifier, extract_table_rows, debug_tables
 from app.pdf_normalizer.layout_detector import BankDetector
+from app.common.enums import BankName
 
 PARSERS = [
     UnionBankParser,
 ]
 
+BANK_PARSER_MAP = {
+    BankName.UNION : UnionBankParser
+}
 
-def parse_statement(pdf_path: str):
+def parse_statement(pdf_path: str, bank_name: BankName = None):
     text = get_bank_identifier(pdf_path)
 
-    detector = BankDetector(PARSERS)
-    parser_cls = detector.detect(text)
+    if not bank_name:
+        detector = BankDetector(PARSERS)
+        parser_cls = detector.detect(text)
+    else:
+        parser_cls = BANK_PARSER_MAP[bank_name]
 
     parser = parser_cls()
 
@@ -35,6 +43,7 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    result = parse_statement(pdf_path=args.input)
-    breakpoint()
-    print(result)
+    result = parse_statement(pdf_path=args.input, bank_name= BankName.UNION)
+    print(len(result))
+    # print(result)
+

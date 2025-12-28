@@ -16,7 +16,7 @@ def get_bank_identifier(pdf_path: str) -> str:
         # Crop to top half: (x0, y0, x1, y1)
         top_half = page.crop((0, 0, page.width, height / 2))
 
-        text = top_half.extract_text() or ""
+        text = page.extract_text() or ""
         return text.lower()
 
 
@@ -128,62 +128,6 @@ def has_date_header(row: list[str]) -> int | None:
             return i
 
     return None
-
-def extract_table_rows1(pdf_path: str) -> list[list[str]]:
-    """Extract rows from tables that have a 'Date' column header."""
-    all_rows = []
-
-    with pdfplumber.open(pdf_path) as pdf:
-        for page in pdf.pages:
-            for table in page.find_tables():
-                data = table.extract()
-                if not data or len(data) < 2:
-                    continue
-
-                # Check first few rows for date header
-                date_col = None
-                header_row_idx = None
-
-                for idx, row in enumerate(data[:3]):
-                    date_col = has_date_header(row)
-                    if date_col is not None:
-                        header_row_idx = idx
-                        break
-
-                # Skip table if no date header found
-                if date_col is None:
-                    continue
-
-                pending_row = None
-
-                # Process rows after header
-                for row in data[header_row_idx + 1:]:
-                    if not row or not any(cell and cell.strip() for cell in row):
-                        continue
-
-                    cleaned = [cell.strip().replace('\n', ' ') if cell else "" for cell in row]
-
-                    # Check if this is a data row (has date value in date column)
-                    has_date = is_date_like(cleaned[date_col]) if date_col < len(cleaned) else False
-
-                    if has_date:
-                        if pending_row:
-                            all_rows.append(pending_row)
-                        pending_row = cleaned
-                    elif pending_row:
-                        # Continuation row - merge
-                        for i, cell in enumerate(cleaned):
-                            if cell and i < len(pending_row):
-                                if pending_row[i]:
-                                    pending_row[i] += " " + cell
-                                else:
-                                    pending_row[i] = cell
-
-                if pending_row:
-                    all_rows.append(pending_row)
-
-    return all_rows
-
 
 
 def extract_table_rows(pdf_path: str) -> list[list[str]]:
@@ -302,8 +246,12 @@ def _normalize_date(date_str: str) -> Optional[str]:
     return None
 
 
-def transform_dict(**kwargs):
+def transform_dict():
+    """
+    Docstring for transform_dict
 
+    :param kwargs: Try to match the schema
+    """
     return {
         'entity_name': '',
         'transaction_date': '',
@@ -319,6 +267,7 @@ def transform_dict(**kwargs):
         'goal_id': None,
         'description': '',
         'reference_id': '',
+        'account_id': None
     }
 
 

@@ -8,9 +8,6 @@ class ParsingRule(ABC):
     def match(self, row: List[str]) -> bool:
         ...
 
-    @abstractmethod
-    def extract(self, row: List[str]) -> Dict:
-        ...
 
 
 class DateAmountRule(ParsingRule):

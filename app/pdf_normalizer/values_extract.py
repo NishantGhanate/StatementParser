@@ -2,6 +2,8 @@ import re
 from decimal import Decimal
 
 from dateutil import parser
+from app.common.enums import TrascationType
+from app.common.constants import PAYMENT_METHODS
 
 
 def parse_amount(value: str) -> Decimal | None:
@@ -9,7 +11,7 @@ def parse_amount(value: str) -> Decimal | None:
     if not value:
         return None
     cleaned = re.sub(r'[^\d.]', '', value)
-    return Decimal(cleaned) if cleaned else None
+    return cleaned if cleaned else None
 
 
 def parse_date(date_str: str) -> str:
@@ -18,31 +20,77 @@ def parse_date(date_str: str) -> str:
     return dt.strftime("%Y-%m-%d")
 
 
-def extract_entity_name(details: str) -> str | None:
-    """Extract entity/person name from transaction details"""
-    details = details.replace('\n', ' ')
-
-    # UPI format: UPI/NAME/...
-    if details.startswith('UPI/'):
-        parts = details.split('/')
-        if len(parts) >= 2:
-            return parts[1].strip()
-
-    # NEFT/IMPS format
-    if details.startswith(('NEFT-', 'IMPS-')):
-        match = re.search(r'(?:NEFT|IMPS)-[^-]+-([^-]+)', details)
-        if match:
-            return match.group(1).strip()
-
-    return None
 
 
 def determine_transaction_type(row: dict) -> str:
     """Return 'credit' or 'debit' based on which field has value"""
-    if row.get('credit'):
-        return 'credit'
-    return 'debit'
+    tx_type = ''
+    match = re.search(r'\b(Cr|Dr)\b', row, re.IGNORECASE)
+    if match:
+        tx_type = TrascationType.CREDIT.value if match.group(1).lower() == "cr" else TrascationType.DEBIT.value
 
+    elif row.get('credit'):
+        return 'credit'
+
+    return tx_type
+
+
+def extract_payment_method(details: str) -> str | None:
+    """Extract payment method from transaction details."""
+    details = details.replace('\n', ' ').strip().upper()
+    return next((method for method, pattern in PAYMENT_METHODS.items() if re.search(pattern, details)), None)
+
+
+def extract_entity_name(details: str) -> str | None:
+    """Extract entity/person name from transaction details."""
+    details = details.replace('\n', ' ').strip()
+
+    # UPI variants (UPI, UPIAR, UPIAB, etc.)
+    if details.upper().startswith('UPI'):
+        match = re.search(r'/(?:DR|CR)/([^/]+)/', details, re.IGNORECASE)
+        if match:
+            return match.group(1).strip()
+        parts = details.split('/')
+        if len(parts) >= 2:
+            return parts[1].strip()
+
+    # NEFT format
+    if details.upper().startswith('NEFT'):
+        match = re.search(r'NEFT-[^-]+-([^-]+)', details, re.IGNORECASE)
+        if match:
+            return match.group(1).strip()
+
+    # IMPS format
+    if details.upper().startswith('IMPS'):
+        match = re.search(r'IMPS-[^-]+-([^-]+)', details, re.IGNORECASE)
+        if match:
+            return match.group(1).strip()
+
+    # RTGS format
+    if details.upper().startswith('RTGS'):
+        match = re.search(r'RTGS-[^-]+-([^-]+)', details, re.IGNORECASE)
+        if match:
+            return match.group(1).strip()
+
+    # NACH format (last value)
+    if details.upper().startswith('NACH'):
+        parts = details.split('/')
+        if len(parts) >= 2:
+            return parts[-1].strip()
+
+    # RTNCHG format (second last value)
+    if details.upper().startswith('RTNCHG'):
+        parts = details.split('/')
+        if len(parts) >= 4:
+            return parts[-2].strip()
+
+    # ACH format
+    if details.upper().startswith('ACH'):
+        parts = details.split('/')
+        if len(parts) >= 2:
+            return parts[-1].strip()
+
+    return None
 
 def normalize_transaction(row: dict, person_id: int = 1) -> dict:
     """
@@ -94,32 +142,6 @@ if __name__ == "__main__":
 
     for k, v in normalized.items():
         print(f"{k}: {v}")
-
-
-
-def extract_entity_name(details: str) -> str | None:
-    """Extract entity/person name from transaction details"""
-    details = details.replace('\n', ' ')
-
-    # UPI format: UPI/NAME/...
-    if details.startswith('UPI/'):
-        parts = details.split('/')
-        if len(parts) >= 2:
-            return parts[1].strip()
-
-    # NEFT/IMPS format
-    if details.startswith(('NEFT-', 'IMPS-')):
-        match = re.search(r'(?:NEFT|IMPS)-[^-]+-([^-]+)', details)
-        if match:
-            return match.group(1).strip()
-
-    return None
-
-def determine_transaction_type(row: dict) -> str:
-    """Return 'credit' or 'debit' based on which field has value"""
-    if row.get('credit'):
-        return 'credit'
-    return 'debit'
 
 
 

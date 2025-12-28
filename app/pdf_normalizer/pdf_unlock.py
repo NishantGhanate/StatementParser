@@ -1,10 +1,11 @@
 """
-Docstring for app.file_extract.pdf_unlock
+Docstring for app.pdf_normalizer.pdf_unlock
 
-> python app/file_extract/pdf_unlock.py files/XXXXXXXX.pdf -p XXXXX
+> python app/pdf_normalizer/pdf_unlock.py files/XXXXXXXX.pdf -p XXXXX
 
-> python app/file_extract/pdf_unlock.py files/XXXX-XXXXXXX.pdf -p XXXXX
+> python app/pdf_normalizer/pdf_unlock.py files/XXXX-XXXXXXX.pdf -p XXXXX
 
+> python app/pdf_normalizer/pdf_unlock.py files/union1.pdf -p XXXXXXXX
 """
 
 

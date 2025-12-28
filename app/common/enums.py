@@ -24,3 +24,13 @@ class TranscationType(StrEnum):
     CHEQUE = 'cheque'
     CASH = 'cash'
 
+
+class BankName(StrEnum):
+    UNION = 'union'
+    KOTAK = 'kotak'
+    HDFC = 'hdfc'
+
+class TrascationType(StrEnum):
+    CREDIT = 'credit'
+    DEBIT = 'debit'
+    SELF_TRANSFER = 'self transfer'

@@ -12,7 +12,7 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from app.api.v1 import PREFIX
 from app.common.file_util import temp_dir
-# from app.tasks.file_upload import manage_file_upload
+from app.tasks.file_upload import manage_file_upload
 
 logger = logging.getLogger(name="app")
 
@@ -84,22 +84,18 @@ async def file_upload(
 
         # # content = await file.read()  # simple read op
         # # step 1: save the file
-        # task_obj = manage_file_upload(
-        #     date_of_extraction=date_of_extraction,
-        #     file_name=file.filename,
-        #     file_path=temp_path,
-        #     tab_header=tab_header.value,
-        # )
-
-        task_obj = {}
+        task_obj = manage_file_upload(
+            date_of_extraction=date_of_extraction,
+            file_name=file.filename,
+            file_path=temp_path,
+        )
 
         content = {
             "filename": file.filename,
             "subject": subject,
             "from_email": from_email,
             "date": date,
-            "transaction_count": 1,
-            "transactions": 1
+            'task_id': task_obj.id
         }
 
     except Exception as e:
