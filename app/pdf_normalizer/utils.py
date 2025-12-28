@@ -3,6 +3,7 @@ import re
 from decimal import Decimal
 from datetime import datetime
 from typing import List, Dict, Optional
+from app.common.enums import BANK_EMAIL_PATTERNS, BankName
 
 
 def get_bank_identifier(pdf_path: str) -> str:
@@ -93,10 +94,6 @@ def extract_table_rows(pdf_path: str) -> list[list[str]]:
                     all_rows.append(pending_row)
 
     return all_rows
-
-
-import pdfplumber
-import re
 
 
 def has_date_header(row: list[str]) -> int | None:
@@ -269,6 +266,12 @@ def transform_dict():
         'reference_id': '',
         'account_id': None
     }
+
+
+def get_bank_from_email(email: str) -> BankName | None:
+    """Determine bank from email address."""
+    email = email.lower()
+    return next((bank for bank, pattern in BANK_EMAIL_PATTERNS.items() if re.search(pattern, email)), None)
 
 
 if __name__ == "__main__":

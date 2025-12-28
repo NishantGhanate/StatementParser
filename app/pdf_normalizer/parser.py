@@ -31,7 +31,7 @@ def parse_statement(pdf_path: str, bank_name: BankName = None):
 
     parser = parser_cls()
 
-    rows = debug_tables(pdf_path)
+    # rows = debug_tables(pdf_path)
     rows = extract_table_rows(pdf_path)
     extract_dict = parser.parse_rows(rows)
     return extract_dict

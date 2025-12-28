@@ -26,9 +26,36 @@ class TranscationType(StrEnum):
 
 
 class BankName(StrEnum):
-    UNION = 'union'
-    KOTAK = 'kotak'
-    HDFC = 'hdfc'
+    UNION = "union"
+    KOTAK = "kotak"
+    SBI = "sbi"
+    HDFC = "hdfc"
+    ICICI = "icici"
+    AXIS = "axis"
+    PNB = "pnb"
+    BOB = "bob"
+    CANARA = "canara"
+    IDBI = "idbi"
+    YES = "yes"
+    INDUSIND = "indusind"
+    FEDERAL = "federal"
+
+
+BANK_EMAIL_PATTERNS = {
+    BankName.UNION: r"unionbank",
+    BankName.KOTAK: r"kotak",
+    BankName.SBI: r"sbi\.co\.in|@sbi\.",
+    BankName.HDFC: r"hdfc",
+    BankName.ICICI: r"icici",
+    BankName.AXIS: r"axis",
+    BankName.PNB: r"pnb|punjabnational",
+    BankName.BOB: r"bankofbaroda|bob",
+    BankName.CANARA: r"canara",
+    BankName.IDBI: r"idbi",
+    BankName.YES: r"yesbank",
+    BankName.INDUSIND: r"indusind",
+    BankName.FEDERAL: r"federal",
+}
 
 class TrascationType(StrEnum):
     CREDIT = 'credit'

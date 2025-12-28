@@ -12,7 +12,7 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from app.api.v1 import PREFIX
 from app.common.file_util import temp_dir
-from app.tasks.file_upload import manage_file_upload
+from app.tasks.bank_statement_upload import process_bank_pdf
 
 logger = logging.getLogger(name="app")
 
@@ -29,12 +29,6 @@ class FileMeta(BaseModel):
     subject: str | None = None
     from_email: str | None = None
 
-def parse_meta(meta: str = Form(...)) -> FileMeta:
-    """Dependency to parse meta JSON string."""
-    try:
-        return FileMeta.model_validate_json(meta)
-    except Exception:
-        raise HTTPException(status_code=400, detail="Invalid JSON in meta field")
 
 @file_upload_router.post("/upload")
 async def file_upload(
@@ -84,10 +78,11 @@ async def file_upload(
 
         # # content = await file.read()  # simple read op
         # # step 1: save the file
-        task_obj = manage_file_upload(
-            date_of_extraction=date_of_extraction,
-            file_name=file.filename,
-            file_path=temp_path,
+        task_obj = process_bank_pdf.apply_async(
+            kwargs = {
+                'file_path': temp_path,
+                'from_email': from_email
+            }
         )
 
         content = {

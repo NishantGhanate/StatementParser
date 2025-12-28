@@ -2,8 +2,11 @@
 Setup Celery app with Redis broker and optional MSSQL result backend.
 Set USE_DB=true to enable MSSQL result backend.
 
+> source venv/bin/activate
+> source .env
+
 > celery -A app.core.celery_app.celery_app worker --loglevel=info
-> celery -A app.core.celery_app:celery_app worker -Q documents,celery --loglevel=info  --events
+> celery -A app.core.celery_app:celery_app worker -Q statment_parser,celery --loglevel=info  --events
 """
 
 import logging
@@ -14,23 +17,23 @@ from celery.schedules import crontab
 from sqlalchemy import BigInteger, create_engine
 
 from app.config.settings import settings
-from app.core.celery_task_signal import BaseTaskSignal
+from app.core.celery_signal import BaseTaskSignal
 
 logger = logging.getLogger(__name__)
 
-engine = create_engine(
-    settings.CELERY_BACKEND_URL.replace(
-        "db+", ""
-    )  # Remove Celery prefix for SQLAlchemy
-)
+# engine = create_engine(
+#     settings.CELERY_BACKEND_URL.replace(
+#         "db+", ""
+#     )  # Remove Celery prefix for SQLAlchemy
+# )
 
-# Monkey patching only for MSSQL & json result wont work.
-# Mssql : https://github.com/celery/celery/issues/8634
-# https://github.com/celery/celery/milestone/44
-TaskExtended.__table__.c.id.type = BigInteger()
-TaskSet.__table__.c.id.type = BigInteger()
-TaskExtended.__table__.create(bind=engine, checkfirst=True)
-TaskSet.__table__.create(bind=engine, checkfirst=True)
+# # Monkey patching only for MSSQL & json result wont work.
+# # Mssql : https://github.com/celery/celery/issues/8634
+# # https://github.com/celery/celery/milestone/44
+# TaskExtended.__table__.c.id.type = BigInteger()
+# TaskSet.__table__.c.id.type = BigInteger()
+# TaskExtended.__table__.create(bind=engine, checkfirst=True)
+# TaskSet.__table__.create(bind=engine, checkfirst=True)
 
 
 # Initialize Celery
@@ -48,6 +51,8 @@ celery_app.conf.update(
     accept_content=["json"],
     result_serializer="json",
     result_accept_content=["json"],
+    task_track_started=True,
+    worker_send_task_events=True
 )
 
 
