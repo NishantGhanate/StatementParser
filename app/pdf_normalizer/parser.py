@@ -12,19 +12,30 @@ from app.pdf_normalizer.utils import get_bank_identifier, extract_table_rows, de
 from app.pdf_normalizer.layout_detector import BankDetector
 from app.common.enums import BankName
 
-PARSERS = [
-    UnionBankParser,
-]
 
 BANK_PARSER_MAP = {
     BankName.UNION : UnionBankParser
 }
 
 def parse_statement(pdf_path: str, bank_name: BankName = None):
+    """
+    Docstring for parse_statement
+
+    Returns:
+        - {
+            "account_details: {
+                ''
+
+            },
+            'transcation_details' : [
+
+            ]
+        }
+    """
     text = get_bank_identifier(pdf_path)
 
     if not bank_name:
-        detector = BankDetector(PARSERS)
+        detector = BankDetector(list(BANK_PARSER_MAP.values()))
         parser_cls = detector.detect(text)
     else:
         parser_cls = BANK_PARSER_MAP[bank_name]
@@ -33,8 +44,13 @@ def parse_statement(pdf_path: str, bank_name: BankName = None):
 
     # rows = debug_tables(pdf_path)
     rows = extract_table_rows(pdf_path)
-    extract_dict = parser.parse_rows(rows)
-    return extract_dict
+    account_details = parser.parse_account_details(text= text)
+    transcation_rows = parser.parse_rows(rows)
+    details = {
+        'account_details' : account_details,
+        'transcations' : transcation_rows
+    }
+    return details
 
 if __name__ == "__main__":
     import argparse

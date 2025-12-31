@@ -35,6 +35,7 @@ async def file_upload(
     file: UploadFile = File(...),
     subject: str = Form(None),
     from_email: str = Form(None),
+    to_email: str = Form(None),
     date: str = Form(None)
 ):
     """
@@ -81,7 +82,8 @@ async def file_upload(
         task_obj = process_bank_pdf.apply_async(
             kwargs = {
                 'file_path': temp_path,
-                'from_email': from_email
+                'from_email': from_email,
+                'to_email' : to_email
             }
         )
 

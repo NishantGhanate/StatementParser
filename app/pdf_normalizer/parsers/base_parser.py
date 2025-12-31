@@ -13,5 +13,9 @@ class BankStatementParser(ABC):
         """Return True if this parser matches the statement"""
 
     @abstractmethod
+    def parse_account_details(self, text: str):
+        pass
+
+    @abstractmethod
     def parse_rows(self, rows: List[List[str]]) -> List[Transaction]:
         """Convert rows → normalized transactions"""

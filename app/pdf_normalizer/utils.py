@@ -243,7 +243,14 @@ def _normalize_date(date_str: str) -> Optional[str]:
     return None
 
 
-def transform_dict():
+def account_details_dict():
+    return {
+        'number' : None,
+        'ifsc_code' : None,
+        'type' : None
+    }
+
+def transcation_dict():
     """
     Docstring for transform_dict
 
