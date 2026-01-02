@@ -1,0 +1,1 @@
+from .bank_statement_upload import process_bank_pdf
